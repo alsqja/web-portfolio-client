@@ -75,6 +75,12 @@ export const Signup = () => {
         {errors.password && <Error>{errors.password}</Error>}
 
         <Button type="submit">회원가입</Button>
+        <Button
+          style={{ marginTop: "15px" }}
+          onClick={() => navigate("/login")}
+        >
+          로그인 페이지로 이동
+        </Button>
       </SignupForm>
     </Container>
   );
