@@ -1,5 +1,5 @@
 export interface IUserWithToken {
-  accessToken: string | null;
+  token: string | null;
   refreshToken: string | null;
   id: string | null;
   name: string | null;

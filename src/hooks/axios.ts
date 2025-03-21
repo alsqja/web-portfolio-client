@@ -53,7 +53,7 @@ export const useAxios = (): UseAxiosType => {
         ...config,
         headers: {
           ...config?.headers,
-          Authorization: `Bearer ${tokens?.accessToken}`,
+          Authorization: `Bearer ${tokens?.token}`,
         },
       };
 

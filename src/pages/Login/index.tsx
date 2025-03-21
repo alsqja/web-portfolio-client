@@ -1,17 +1,35 @@
-import { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { useLogin } from "../../hooks/session";
 import { useNavigate } from "react-router-dom";
+import { useRecoilState } from "recoil";
+import { userState } from "../../stores/session";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [req, res] = useLogin();
+  const [user, setUser] = useRecoilState(userState);
   const navigate = useNavigate();
 
-  const handleSubmit = useCallback(() => {
-    req(email, password);
-  }, [email, password, req]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      req(email, password);
+    },
+    [email, password, req]
+  );
+
+  useEffect(() => {
+    if (res.called && res.data) {
+      console.log("asdasd");
+      setUser(res.data);
+      navigate("/");
+    }
+    if (res.error) {
+      alert(res.error);
+    }
+  }, [navigate, res, setUser]);
 
   return (
     <Container>
