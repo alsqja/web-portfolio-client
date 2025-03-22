@@ -68,8 +68,8 @@ export const useAxios = (): UseAxiosType => {
           : e;
         setError(error);
 
-        if (e.response.status === 401) {
-          if (e.response.data.code === "INVALID_TOKEN") {
+        if (e.response.data.status === 401) {
+          if (e.response.data.message === "invalid token") {
             if (!isRefreshing) {
               isRefreshing = true;
 
