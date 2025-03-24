@@ -22,7 +22,6 @@ export const Login = () => {
 
   useEffect(() => {
     if (res.called && res.data) {
-      console.log("asdasd");
       setUser(res.data);
       navigate("/");
     }

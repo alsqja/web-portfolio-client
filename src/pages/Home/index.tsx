@@ -30,7 +30,8 @@ export const Home = () => {
     }
   }, [getRes]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: string, e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     if (window.confirm("정말 삭제하시겠습니까?")) {
       deleteReq(id);
     }
@@ -80,7 +81,7 @@ export const Home = () => {
               key={portfolio.id}
               onClick={() => navigate(`/portfolio/${portfolio.id}`)}
             >
-              <DeleteButton onClick={() => handleDelete(portfolio.id)}>
+              <DeleteButton onClick={(e) => handleDelete(portfolio.id, e)}>
                 ×
               </DeleteButton>
               <FileName>

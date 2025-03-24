@@ -6,30 +6,38 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import axios from "axios";
 import { pdfjs } from "react-pdf";
+import { IPortfolio } from "../Home/data";
+import { useGetPortfolio } from "../../hooks/portfolioApi";
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.js";
 
 export const PortfolioView = () => {
   const { id } = useParams();
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [portfolio, setPortfolio] = useState<IPortfolio | null>(null);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
-
-  const portfolio = {
-    id: "b354c6c4-2148-4342-9d39-1d5eef0b6ba1",
-    fileName:
-      "7dd089e5-aa92-4582-9f1d-5d53867819c5_김민범-포트폴리오.pdf",
-    fileUrl:
-      "https://web-portfolio-files.s3.ap-northeast-2.amazonaws.com/19ee42ca-f2a9-4789-a00b-fd6ce79daddc_7dd089e5-aa92-4582-9f1d-5d53867819c5_%E1%84%80%E1%85%B5%E1%86%B7%E1%84%86%E1%85%B5%E1%86%AB%E1%84%87%E1%85%A5%E1%86%B7-%E1%84%91%E1%85%A9%E1%84%90%E1%85%B3%E1%84%91%E1%85%A9%E1%86%AF%E1%84%85%E1%85%B5%E1%84%8B%E1%85%A9+(1).pdf",
-    createdAt: "2025-03-21T10:01:11.824676",
-    updatedAt: "2025-03-21T10:01:11.824676",
-  };
+  const [getReq, getRes] = useGetPortfolio();
 
   useEffect(() => {
-    axios
-      .get(portfolio.fileUrl, { responseType: "blob" })
-      .then((res) => setPdfBlob(res.data))
-      .catch((err) => console.error("❌ PDF fetch 실패", err));
-  }, [portfolio.fileUrl]);
+    if (!!id) {
+      getReq(id);
+    }
+  }, [getReq, id]);
+
+  useEffect(() => {
+    if (getRes.data && getRes.called) {
+      setPortfolio(getRes.data);
+    }
+  }, [getRes.called, getRes.data]);
+
+  useEffect(() => {
+    if (portfolio) {
+      axios
+        .get(portfolio.fileUrl, { responseType: "blob" })
+        .then((res) => setPdfBlob(res.data))
+        .catch((err) => console.error("❌ PDF fetch 실패", err));
+    }
+  }, [portfolio]);
 
   useEffect(() => {
     console.log(`현재 페이지: ${currentPage}`);
@@ -64,17 +72,10 @@ export const PortfolioView = () => {
                   width={window.innerWidth - 40}
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
-                  canvasRef={(canvas) => {
-                    if (canvas) {
-                      const ctx = canvas.getContext("2d", {
-                        willReadFrequently: true,
-                      });
-                    }
-                  }}
                 />
               );
             } else {
-              return <div key={pageNumber} style={{ height: "1200px" }}></div>; // lazy spacing
+              return <div key={pageNumber} style={{ height: "1200px" }}></div>;
             }
           })}
         </StyledDocument>
