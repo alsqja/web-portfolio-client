@@ -13,3 +13,23 @@ export const useGetUserPortfolio = () => {
 
   return [run, response] as [typeof run, typeof response];
 };
+
+export const useUploadPortfolio = () => {
+  const [request, response] = useAxios();
+
+  const run = useCallback(
+    (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      return request({
+        url: "portfolios",
+        method: "POST",
+        data: formData,
+      });
+    },
+    [request]
+  );
+
+  return [run, response] as [typeof run, typeof response];
+};

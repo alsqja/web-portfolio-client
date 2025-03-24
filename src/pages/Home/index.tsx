@@ -1,12 +1,17 @@
 import styled from "styled-components";
 import { Layout } from "../../components/Layout";
 import { IPortfolio } from "./data";
-import { useGetUserPortfolio } from "../../hooks/portfolioApi";
-import { useEffect, useState } from "react";
+import {
+  useGetUserPortfolio,
+  useUploadPortfolio,
+} from "../../hooks/portfolioApi";
+import { useEffect, useRef, useState } from "react";
 
 export const Home = () => {
   const [getReq, getRes] = useGetUserPortfolio();
-  const [portfolioData, setPortfolioData] = useState([]);
+  const [portfolioData, setPortfolioData] = useState<IPortfolio[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [postReq, postRes] = useUploadPortfolio();
 
   useEffect(() => {
     getReq();
@@ -21,13 +26,48 @@ export const Home = () => {
     }
   }, [getRes]);
 
+  const handleDelete = (id: string) => {
+    if (window.confirm("정말 삭제하시겠습니까?")) {
+      console.log("삭제 요청:", id);
+      // TODO: 삭제 요청 로직 추가
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      postReq(file);
+    }
+  };
+
+  useEffect(() => {
+    if (postRes.data && postRes.called) {
+      alert("업로드 완료");
+      window.location.reload();
+    } else if (postRes.error && postRes.called) {
+      alert(postRes.error);
+    }
+  }, [postRes.called, postRes.data, postRes.error]);
+
   return (
     <Layout>
       <Container>
         <Title>내 포트폴리오</Title>
         <PortfolioGrid>
+          <UploadCard onClick={() => fileInputRef.current?.click()}>
+            + 포트폴리오 업로드
+            <HiddenInput
+              type="file"
+              accept="application/pdf"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+          </UploadCard>
           {portfolioData.map((portfolio: IPortfolio) => (
             <PortfolioCard key={portfolio.id}>
+              <DeleteButton onClick={() => handleDelete(portfolio.id)}>
+                ×
+              </DeleteButton>
               <FileName>
                 {portfolio.fileName.split("_").slice(1).join("_")}
               </FileName>
@@ -58,6 +98,7 @@ const PortfolioGrid = styled.div`
 `;
 
 const PortfolioCard = styled.div`
+  position: relative;
   background: white;
   padding: 15px;
   border-radius: 8px;
@@ -72,6 +113,30 @@ const PortfolioCard = styled.div`
   }
 `;
 
+const UploadCard = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f0f0f0;
+  color: #007bff;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  height: 120px;
+  position: relative;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #e0e0e0;
+  }
+`;
+
+const HiddenInput = styled.input`
+  display: none;
+`;
+
 const FileName = styled.p`
   font-weight: bold;
   color: #333;
@@ -80,4 +145,20 @@ const FileName = styled.p`
 const UploadDate = styled.p`
   font-size: 14px;
   color: #666;
+  margin-bottom: 10px;
+`;
+
+const DeleteButton = styled.button`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  color: #dc3545;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+
+  &:hover {
+    color: #c82333;
+  }
 `;
