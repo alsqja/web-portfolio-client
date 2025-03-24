@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { Layout } from "../../components/Layout";
 import { IPortfolio } from "./data";
 import {
+  useDeletePortfolio,
   useGetUserPortfolio,
   useUploadPortfolio,
 } from "../../hooks/portfolioApi";
@@ -12,6 +13,7 @@ export const Home = () => {
   const [portfolioData, setPortfolioData] = useState<IPortfolio[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [postReq, postRes] = useUploadPortfolio();
+  const [deleteReq, deleteRes] = useDeletePortfolio();
 
   useEffect(() => {
     getReq();
@@ -28,8 +30,7 @@ export const Home = () => {
 
   const handleDelete = (id: string) => {
     if (window.confirm("정말 삭제하시겠습니까?")) {
-      console.log("삭제 요청:", id);
-      // TODO: 삭제 요청 로직 추가
+      deleteReq(id);
     }
   };
 
@@ -48,6 +49,15 @@ export const Home = () => {
       alert(postRes.error);
     }
   }, [postRes.called, postRes.data, postRes.error]);
+
+  useEffect(() => {
+    if (deleteRes.called && !deleteRes.error) {
+      alert("삭제되었습니다.");
+      window.location.reload();
+    } else if (deleteRes.error) {
+      alert(deleteRes.error);
+    }
+  }, [deleteRes.called, deleteRes.error]);
 
   return (
     <Layout>

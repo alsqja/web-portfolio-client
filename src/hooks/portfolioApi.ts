@@ -33,3 +33,19 @@ export const useUploadPortfolio = () => {
 
   return [run, response] as [typeof run, typeof response];
 };
+
+export const useDeletePortfolio = () => {
+  const [request, response] = useAxios();
+
+  const run = useCallback(
+    (id: string) => {
+      return request({
+        url: `portfolios/${id}`,
+        method: "DELETE",
+      });
+    },
+    [request]
+  );
+
+  return [run, response] as [typeof run, typeof response];
+};
