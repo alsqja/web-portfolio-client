@@ -7,6 +7,7 @@ import {
   useUploadPortfolio,
 } from "../../hooks/portfolioApi";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
   const [getReq, getRes] = useGetUserPortfolio();
@@ -14,6 +15,7 @@ export const Home = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [postReq, postRes] = useUploadPortfolio();
   const [deleteReq, deleteRes] = useDeletePortfolio();
+  const navigate = useNavigate();
 
   useEffect(() => {
     getReq();
@@ -74,7 +76,10 @@ export const Home = () => {
             />
           </UploadCard>
           {portfolioData.map((portfolio: IPortfolio) => (
-            <PortfolioCard key={portfolio.id}>
+            <PortfolioCard
+              key={portfolio.id}
+              onClick={() => navigate(`/portfolio/${portfolio.id}`)}
+            >
               <DeleteButton onClick={() => handleDelete(portfolio.id)}>
                 ×
               </DeleteButton>
