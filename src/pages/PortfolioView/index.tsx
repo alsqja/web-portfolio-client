@@ -17,6 +17,9 @@ export const PortfolioView = () => {
   const [portfolio, setPortfolio] = useState<IPortfolio | null>(null);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [getReq, getRes] = useGetPortfolio();
+  const [pageSizes, setPageSizes] = useState<{
+    [key: number]: { width: number; height: number };
+  }>({});
 
   useEffect(() => {
     if (!!id) {
@@ -54,6 +57,16 @@ export const PortfolioView = () => {
     if (page !== currentPage) setCurrentPage(page);
   };
 
+  const onPageRenderSuccess = (page: any) => {
+    setPageSizes((prev) => ({
+      ...prev,
+      [page.pageNumber]: {
+        width: page.originalWidth,
+        height: page.originalHeight,
+      },
+    }));
+  };
+
   return (
     <FullScreenContainer onScroll={handleScroll}>
       {pdfBlob ? (
@@ -64,18 +77,22 @@ export const PortfolioView = () => {
         >
           {Array.from(new Array(numPages), (_, index) => {
             const pageNumber = index + 1;
+            const size = pageSizes[pageNumber];
+            const isWide = size && size.width > window.innerWidth;
             if (Math.abs(pageNumber - currentPage) <= 2) {
               return (
                 <Page
                   key={pageNumber}
                   pageNumber={pageNumber}
-                  width={window.innerWidth - 40}
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
+                  height={window.innerHeight - 20}
+                  width={isWide ? window.innerWidth - 40 : undefined}
+                  onRenderSuccess={onPageRenderSuccess}
                 />
               );
             } else {
-              return <div key={pageNumber} style={{ height: "1200px" }}></div>;
+              return <div key={pageNumber} style={{ height: "100vh" }}></div>;
             }
           })}
         </StyledDocument>
