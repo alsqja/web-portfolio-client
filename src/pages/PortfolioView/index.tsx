@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Document, Page } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
@@ -8,6 +8,7 @@ import axios from "axios";
 import { pdfjs } from "react-pdf";
 import { IPortfolio } from "../Home/data";
 import { useGetPortfolio } from "../../hooks/portfolioApi";
+import { v4 as uuidv4 } from "uuid";
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.js";
 
 export const PortfolioView = () => {
@@ -20,6 +21,11 @@ export const PortfolioView = () => {
   const [pageSizes, setPageSizes] = useState<{
     [key: number]: { width: number; height: number };
   }>({});
+
+  const visitId = useRef<string>(uuidv4());
+  const pageEnterTime = useRef<number>(Date.now());
+  const activityLogs = useRef<{ page: number; durationMs: number }[]>([]);
+  const prevPage = useRef<number>(1);
 
   useEffect(() => {
     if (!!id) {
@@ -38,7 +44,7 @@ export const PortfolioView = () => {
       axios
         .get(portfolio.fileUrl, { responseType: "blob" })
         .then((res) => setPdfBlob(res.data))
-        .catch((err) => console.error("❌ PDF fetch 실패", err));
+        .catch((err) => console.error("PDF fetch 실패", err));
     }
   }, [portfolio]);
 
@@ -66,6 +72,63 @@ export const PortfolioView = () => {
       },
     }));
   };
+
+  useEffect(() => {
+    const now = Date.now();
+    const duration = now - pageEnterTime.current;
+
+    if (prevPage.current !== currentPage) {
+      const existingLog = activityLogs.current.find(
+        (log) => log.page === prevPage.current
+      );
+      if (existingLog) {
+        existingLog.durationMs += duration;
+      } else {
+        activityLogs.current.push({
+          page: prevPage.current,
+          durationMs: duration,
+        });
+      }
+      prevPage.current = currentPage;
+      pageEnterTime.current = now;
+    }
+  }, [currentPage]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const now = Date.now();
+      const duration = now - pageEnterTime.current;
+      const existingLog = activityLogs.current.find(
+        (log) => log.page === prevPage.current
+      );
+
+      if (existingLog) {
+        existingLog.durationMs += duration;
+      } else {
+        activityLogs.current.push({
+          page: prevPage.current,
+          durationMs: duration,
+        });
+      }
+
+      if (portfolio) {
+        const payload = {
+          visitId: visitId.current,
+          portfolioId: portfolio.id,
+          pageLogs: activityLogs.current,
+        };
+
+        // 👉 안전한 전송 방식
+        navigator.sendBeacon(
+          "http://localhost:8080/activity-logs",
+          new Blob([JSON.stringify(payload)], { type: "application/json" })
+        );
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [portfolio]);
 
   return (
     <FullScreenContainer onScroll={handleScroll}>
