@@ -6,6 +6,7 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import axios from "axios";
 import { pdfjs } from "react-pdf";
+import { useLocation } from "react-router-dom";
 import { IPortfolio } from "../Home/data";
 import { useGetPortfolio } from "../../hooks/portfolioApi";
 import { v4 as uuidv4 } from "uuid";
@@ -26,6 +27,7 @@ export const PortfolioView = () => {
   const pageEnterTime = useRef<number>(Date.now());
   const activityLogs = useRef<{ page: number; durationMs: number }[]>([]);
   const prevPage = useRef<number>(1);
+  const location = useLocation();
 
   useEffect(() => {
     if (!!id) {
@@ -118,7 +120,6 @@ export const PortfolioView = () => {
           pageLogs: activityLogs.current,
         };
 
-        // 👉 안전한 전송 방식
         navigator.sendBeacon(
           "http://localhost:8080/activity-logs",
           new Blob([JSON.stringify(payload)], { type: "application/json" })
@@ -129,6 +130,42 @@ export const PortfolioView = () => {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [portfolio]);
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      const now = Date.now();
+      const duration = now - pageEnterTime.current;
+      const existingLog = activityLogs.current.find(
+        (log) => log.page === prevPage.current
+      );
+
+      if (existingLog) {
+        existingLog.durationMs += duration;
+      } else {
+        activityLogs.current.push({
+          page: prevPage.current,
+          durationMs: duration,
+        });
+      }
+
+      if (portfolio) {
+        const payload = {
+          visitId: visitId.current,
+          portfolioId: portfolio.id,
+          pageLogs: activityLogs.current,
+        };
+
+        navigator.sendBeacon(
+          "http://localhost:8080/activity-logs",
+          new Blob([JSON.stringify(payload)], { type: "application/json" })
+        );
+      }
+    };
+
+    return () => {
+      handleRouteChange();
+    };
+  }, [location, portfolio]);
 
   return (
     <FullScreenContainer onScroll={handleScroll}>
