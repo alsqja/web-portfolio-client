@@ -185,7 +185,7 @@ export const PortfolioView = () => {
                   key={pageNumber}
                   pageNumber={pageNumber}
                   renderTextLayer={false}
-                  renderAnnotationLayer={false}
+                  renderAnnotationLayer={true}
                   height={window.innerHeight - 20}
                   width={isWide ? window.innerWidth - 40 : undefined}
                   onRenderSuccess={onPageRenderSuccess}
