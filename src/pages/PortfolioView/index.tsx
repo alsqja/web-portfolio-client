@@ -10,6 +10,7 @@ import { useLocation } from "react-router-dom";
 import { IPortfolio } from "../Home/data";
 import { useGetPortfolio } from "../../hooks/portfolioApi";
 import { v4 as uuidv4 } from "uuid";
+
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.js";
 
 export const PortfolioView = () => {
