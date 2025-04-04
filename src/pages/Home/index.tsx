@@ -91,6 +91,14 @@ export const Home = () => {
                 업로드 날짜:{" "}
                 {new Date(portfolio.createdAt).toLocaleDateString()}
               </UploadDate>
+              <LogButton
+                onClick={(e) => {
+                  e.stopPropagation(); // 카드 클릭 방지
+                  navigate(`/portfolio-log/${portfolio.id}`);
+                }}
+              >
+                로그 보기
+              </LogButton>
             </PortfolioCard>
           ))}
         </PortfolioGrid>
@@ -176,5 +184,20 @@ const DeleteButton = styled.button`
 
   &:hover {
     color: #c82333;
+  }
+`;
+
+const LogButton = styled.button`
+  margin-top: 10px;
+  padding: 6px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #0056b3;
   }
 `;
