@@ -1,23 +1,22 @@
 import styled from "styled-components";
 import { useEffect, useState } from "react";
+import { ActivityLog } from "./data";
 
-interface PageLog {
-  page: number;
-  durationMs: number;
-}
-
-interface ActivityLog {
-  visitId: string;
-  portfolioId: string;
-  pageLogs: PageLog[];
-}
-
-interface Props {
+interface IProps {
   logs: ActivityLog[];
 }
 
-export const ActivityLogTable = ({ logs }: Props) => {
+const LOGS_PER_PAGE = 10;
+
+export const ActivityLogTable = ({ logs }: IProps) => {
   const [columns, setColumns] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const totalPages = Math.ceil(logs.length / LOGS_PER_PAGE);
+  const paginatedLogs = logs.slice(
+    (currentPage - 1) * LOGS_PER_PAGE,
+    currentPage * LOGS_PER_PAGE
+  );
 
   useEffect(() => {
     const pageSet = new Set<number>();
@@ -26,6 +25,14 @@ export const ActivityLogTable = ({ logs }: Props) => {
     });
     setColumns(Array.from(pageSet).sort((a, b) => a - b));
   }, [logs]);
+
+  const handlePrev = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNext = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
 
   return (
     <TableContainer>
@@ -39,7 +46,7 @@ export const ActivityLogTable = ({ logs }: Props) => {
           </tr>
         </thead>
         <tbody>
-          {logs.map((log) => (
+          {paginatedLogs.map((log) => (
             <tr key={log.visitId}>
               <td>{log.visitId}</td>
               {columns.map((page) => {
@@ -54,6 +61,18 @@ export const ActivityLogTable = ({ logs }: Props) => {
           ))}
         </tbody>
       </StyledTable>
+
+      <PaginationWrapper>
+        <button onClick={handlePrev} disabled={currentPage === 1}>
+          이전
+        </button>
+        <span>
+          {currentPage} / {totalPages}
+        </span>
+        <button onClick={handleNext} disabled={currentPage === totalPages}>
+          다음
+        </button>
+      </PaginationWrapper>
     </TableContainer>
   );
 };
@@ -79,5 +98,31 @@ const StyledTable = styled.table`
   }
   tbody tr:nth-child(even) {
     background-color: #fafafa;
+  }
+`;
+
+const PaginationWrapper = styled.div`
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+
+  button {
+    padding: 6px 12px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    line-height: 32px;
+    font-weight: bold;
   }
 `;
