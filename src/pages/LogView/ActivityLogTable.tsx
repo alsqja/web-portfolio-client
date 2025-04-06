@@ -36,6 +36,7 @@ export const ActivityLogTable = ({ logs }: IProps) => {
 
   return (
     <TableContainer>
+      <UnitInfo>(단위 : ms)</UnitInfo>
       <StyledTable>
         <thead>
           <tr>
@@ -51,11 +52,7 @@ export const ActivityLogTable = ({ logs }: IProps) => {
               <td>{log.visitId}</td>
               {columns.map((page) => {
                 const pageLog = log.pageLogs.find((p) => p.page === page);
-                return (
-                  <td key={page}>
-                    {pageLog ? pageLog.durationMs + " ms" : "-"}
-                  </td>
-                );
+                return <td key={page}>{pageLog ? pageLog.durationMs : "-"}</td>;
               })}
             </tr>
           ))}
@@ -125,4 +122,11 @@ const PaginationWrapper = styled.div`
     line-height: 32px;
     font-weight: bold;
   }
+`;
+
+const UnitInfo = styled.div`
+  text-align: right;
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 6px;
 `;
