@@ -20,6 +20,7 @@
     "react-pdf": "^7.7.3",
     "react-router-dom": "^7.3.0",
     "react-scripts": "5.0.1",
+    "recharts": "^2.15.3",
     "recoil": "^0.7.7",
     "recoil-persist": "^5.1.0",
     "styled-components": "^6.1.15",

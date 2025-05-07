@@ -4,6 +4,7 @@ import { ActivityLog } from "./data";
 import { useGetPortfolioLogs } from "../../hooks/logApi";
 import { useParams } from "react-router-dom";
 import { ActivityLogTable } from "./ActivityLogTable";
+import { ActivityChart } from "./ActivityLogChart";
 
 export const LogView = () => {
   const { id } = useParams();
@@ -24,5 +25,10 @@ export const LogView = () => {
     }
   }, [getRes.called, getRes.data]);
 
-  return <Layout>{<ActivityLogTable logs={logs || []} />}</Layout>;
+  return (
+    <Layout>
+      <ActivityChart logs={logs || []} />
+      <ActivityLogTable logs={logs || []} />
+    </Layout>
+  );
 };
