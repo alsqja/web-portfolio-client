@@ -39,7 +39,6 @@ export const ActivityChart = ({ logs }: IProps) => {
         durations.reduce((sum, dur) => sum + dur, 0) / durations.length,
     }));
 
-    // 페이지 순으로 정렬
     avgData.sort((a, b) => a.page - b.page);
 
     setChartData(avgData);
