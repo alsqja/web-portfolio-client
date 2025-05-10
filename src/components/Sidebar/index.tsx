@@ -12,9 +12,9 @@ export const Sidebar = () => {
       >
         내 포트폴리오
       </NavItem>
-      <NavItem to="/stats" active={location.pathname === "/stats"}>
+      {/* <NavItem to="/stats" active={location.pathname === "/stats"}>
         통계
-      </NavItem>
+      </NavItem> */}
     </SidebarContainer>
   );
 };
